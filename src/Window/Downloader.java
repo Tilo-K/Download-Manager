@@ -1,31 +1,76 @@
 package Window;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.event.ActionListener;
+import java.io.File;
 
 public class Downloader {
     private int x, y, width;
     private JProgressBar progressBar;
-    private JLabel nameLabel;
+    private JTextArea nameArea;
+    private JButton downloadBtn;
+    private File downDir;
+    private JFrame frame;
+    private Thread downloadThread;
+    private boolean downloading;
 
-    public Downloader(int x, int y, int width){
+    public Downloader(int x, int y, int width, JFrame frame){
         this.x = x;
         this.y = y;
         this.width = width;
+        this.frame = frame;
+        this.downloading = false;
 
-        this.nameLabel = new JLabel("No File");
-        this.nameLabel.setLocation(this.x, this.y);
-        this.nameLabel.setSize(width, width/15);
+        this.nameArea = new JTextArea("No File");
+        this.nameArea.setLocation(this.x, this.y);
+        this.nameArea.setSize(new Double(width*0.75d).intValue(), width/20);
+        this.nameArea.setBackground(frame.getBackground());
 
         this.progressBar = new JProgressBar();
         this.progressBar.setLocation(this.x, (this.y+width/15));
         this.progressBar.setSize(width, width/15);
+
+        this.downloadBtn = new JButton("Download");
+        this.downloadBtn.setSize(new Double(width*0.25d).intValue(), width/20);
+        this.downloadBtn.setLocation(this.x + new Double(width*0.75d).intValue(), this.y);
+        this.downloadBtn.addActionListener(onClick);
     }
 
     public JProgressBar getProgressBar(){
         return this.progressBar;
     }
 
-    public JLabel getNameLabel(){
-        return this.nameLabel;
+    public JTextArea getNameArea(){
+        return this.nameArea;
     }
+
+    public JButton getDownloadBtn(){
+        return this.downloadBtn;
+    }
+
+    ActionListener onClick = e -> {
+        if(!downloading) {
+            JFileChooser fc = new JFileChooser();
+            fc.addChoosableFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f.isDirectory();
+                }
+
+                @Override
+                public String getDescription() {
+                    return null;
+                }
+            });
+
+            fc.showDialog(this.frame, "Speichern");
+            this.downDir = fc.getSelectedFile();
+
+
+        }else{
+            //TODO: add cancel ability
+        }
+    };
+
 }

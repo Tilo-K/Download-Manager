@@ -24,16 +24,17 @@ public class Frame extends JFrame {
 
         this.downloads = new LinkedList<>();
 
-        for(int i = 0; i < 1; i++){
+        for(int i = 0; i < 8; i++){
             double wD = width*0.5;
             int w = (int)wD;
-            downloads.add(new Downloader(10, 10+(50*i), w));
+            downloads.add(new Downloader(10, 10+(75*i), w, this));
         }
 
 
         for(Downloader d : downloads) {
-            contentPane.add(d.getNameLabel());
+            contentPane.add(d.getNameArea());
             contentPane.add(d.getProgressBar());
+            contentPane.add(d.getDownloadBtn());
         }
 
         super.setContentPane(contentPane);
