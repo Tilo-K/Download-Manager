@@ -1,7 +1,8 @@
 package Window;
 
+import Util.DownloadThread;
+
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionListener;
 import java.io.File;
 
@@ -12,6 +13,7 @@ public class Downloader {
     private JButton downloadBtn;
     private File downDir;
     private JFrame frame;
+    private DownloadThread runn;
     private Thread downloadThread;
     private boolean downloading;
 
@@ -51,25 +53,19 @@ public class Downloader {
 
     ActionListener onClick = e -> {
         if(!downloading) {
+            downloading = true;
+            this.downloadBtn.setText("Cancel");
             JFileChooser fc = new JFileChooser();
-            fc.addChoosableFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File f) {
-                    return f.isDirectory();
-                }
-
-                @Override
-                public String getDescription() {
-                    return null;
-                }
-            });
-
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fc.showDialog(this.frame, "Speichern");
             this.downDir = fc.getSelectedFile();
-
+            this.runn = new DownloadThread(downDir, this.nameArea.getText(), this.progressBar);
+            this.downloadThread = new Thread(this.runn);
+            this.downloadThread.start();
 
         }else{
-            //TODO: add cancel ability
+            this.runn.setCanceled(true);
+            this.downloadBtn.setText("Download");
         }
     };
 

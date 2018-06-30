@@ -11,36 +11,61 @@ public class DownloadThread implements Runnable{
     private File saveFile;
     private int fileEndSize;
     private int progress = 0;
+    private boolean canceled = false;
+    private JProgressBar progressBar;
 
-    public DownloadThread(File downDir, String url){
+    public DownloadThread(File downDir, String url, JProgressBar progressBar){
         this.downDir = downDir;
         this.url = url;
 
         String[] urlArr = url.split("/");
-        this.saveFile = new File(downDir.getAbsolutePath() + urlArr[urlArr.length-1]);
+        this.saveFile = new File(downDir.getAbsolutePath() + "/" +  urlArr[urlArr.length-1]);
+
+        if(!this.saveFile.exists()) {
+            try {
+                this.saveFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        this.progressBar = progressBar;
     }
 
     @Override
     public void run() {
         try {
+            canceled = false;
             URL download = new URL(this.url);
             URLConnection downCon = download.openConnection();
             this.fileEndSize = downCon.getContentLength();
-            BufferedWriter fileOut = new BufferedWriter(new FileWriter(saveFile));
-            BufferedReader urlIn = new BufferedReader(new InputStreamReader(downCon.getInputStream()));
+            FileOutputStream fileOut = new FileOutputStream(saveFile);
+            BufferedInputStream urlIn = new BufferedInputStream(downCon.getInputStream());
             this.progress = 0;
 
-            int left = this.fileEndSize;
-            char[] buff = new char[1024];
+            byte[] buff = new byte[1024];
 
-            while(left > 0){
-                int downloaded = urlIn.read(buff);
-                fileOut.write(buff);
+            int count = 0;
+            while(((count = urlIn.read(buff,0,1024)) != -1) && !canceled){
+                fileOut.write(buff,0,count);
                 fileOut.flush();
 
-                left -= downloaded;
-                progress += downloaded;
+                progress += count;
+
+                this.progressBar.setMinimum(0);
+                this.progressBar.setMaximum(this.fileEndSize);
+                this.progressBar.setValue(progress);
             }
+
+            if(canceled){
+                JOptionPane.showMessageDialog(null, "Canceled");
+            }else{
+                JOptionPane.showMessageDialog(null, "Done !");
+                this.progressBar.setValue(progress);
+            }
+
+            fileOut.close();
+            urlIn.close();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Fehler bei der URL");
@@ -48,15 +73,8 @@ public class DownloadThread implements Runnable{
         }
     }
 
-    public int getProgress(){
-        return this.progress;
-    }
 
-    public int getFileEndSize(){
-        return this.fileEndSize;
-    }
-
-    public void cancel(){
-
+    public void setCanceled(boolean b){
+        canceled = b;
     }
 }
