@@ -59,10 +59,10 @@ public class Downloader {
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fc.showDialog(this.frame, "Speichern");
             this.downDir = fc.getSelectedFile();
-            this.runn = new DownloadThread(downDir, this.nameArea.getText(), this.progressBar);
+            this.runn = new DownloadThread(downDir, this.nameArea.getText(), this.progressBar, this.downloadBtn);
             this.downloadThread = new Thread(this.runn);
             this.downloadThread.start();
-
+            downloading = false;
         }else{
             this.runn.setCanceled(true);
             this.downloadBtn.setText("Download");

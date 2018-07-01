@@ -13,8 +13,9 @@ public class DownloadThread implements Runnable{
     private int progress = 0;
     private boolean canceled = false;
     private JProgressBar progressBar;
+    private JButton downloadBtn;
 
-    public DownloadThread(File downDir, String url, JProgressBar progressBar){
+    public DownloadThread(File downDir, String url, JProgressBar progressBar, JButton downloadBtn){
         this.downDir = downDir;
         this.url = url;
 
@@ -30,6 +31,7 @@ public class DownloadThread implements Runnable{
         }
 
         this.progressBar = progressBar;
+        this.downloadBtn = downloadBtn;
     }
 
     @Override
@@ -67,6 +69,9 @@ public class DownloadThread implements Runnable{
             fileOut.close();
             urlIn.close();
 
+
+            this.progressBar.setValue(0);
+            this.downloadBtn.setText("Download");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Fehler bei der URL");
             e.printStackTrace();
